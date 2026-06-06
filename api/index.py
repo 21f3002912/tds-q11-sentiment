@@ -19,26 +19,30 @@ class SentimentRequest(BaseModel):
 
 
 POSITIVE_TERMS = [
-    "love", "lov", "like", "enjoy", "great", "good",
-    "excellent", "amazing", "awesome", "fantastic",
-    "wonderful", "best", "happy", "joy", "excited",
-    "brilliant", "perfect", "superb", "outstanding",
-    "recommend", "success", "successful", "win",
-    "won", "positive", "beautiful", "pleased",
-    "delighted", "grateful", "thankful", "cheerful",
-    "impressive", "impressed", "favourite", "favorite"
+    "love", "loved", "like", "liked", "enjoy", "enjoyed",
+    "great", "good", "excellent", "amazing", "awesome",
+    "fantastic", "wonderful", "best", "happy", "joy",
+    "excited", "brilliant", "perfect", "superb",
+    "outstanding", "recommend", "recommended",
+    "success", "successful", "win", "won",
+    "positive", "beautiful", "pleased", "delighted",
+    "grateful", "thankful", "cheerful", "impressive",
+    "impressed", "nice", "favourite", "favorite",
+    "thrilled", "glad", "pleasure", "excellent"
 ]
 
 NEGATIVE_TERMS = [
     "hate", "hated", "bad", "terrible", "awful",
     "horrible", "worst", "sad", "angry", "upset",
     "disappointed", "poor", "depressed", "unhappy",
-    "annoy", "frustrat", "negative", "boring",
-    "disaster", "fail", "failure", "problem",
-    "issue", "broken", "slow", "waste",
-    "regret", "furious", "pathetic", "dreadful",
-    "complaint", "miserable", "heartbroken",
-    "tragic", "hurt", "pain", "loss", "lost"
+    "annoying", "frustrating", "negative", "boring",
+    "disaster", "fail", "failed", "failure",
+    "problem", "problems", "issue", "issues",
+    "broken", "slow", "waste", "regret",
+    "furious", "pathetic", "dreadful",
+    "complaint", "complaints", "miserable",
+    "heartbroken", "tragic", "hurt", "pain",
+    "loss", "lost", "unfortunate", "sorry"
 ]
 
 
@@ -48,52 +52,59 @@ def classify_sentiment(sentence: str) -> str:
     positive_score = 0
     negative_score = 0
 
-    for term in POSITIVE_TERMS:
-        if term in text:
+    for word in POSITIVE_TERMS:
+        if word in text:
             positive_score += 1
 
-    for term in NEGATIVE_TERMS:
-        if term in text:
+    for word in NEGATIVE_TERMS:
+        if word in text:
             negative_score += 1
 
-    # Positive phrases
-    if any(
-        phrase in text
-        for phrase in [
-            "thank you",
-            "well done",
-            "looking forward",
-            "works perfectly",
-            "highly recommend",
-            "very happy",
-            "really good",
-            "pleasant surprise",
-            "exceeded expectations"
-        ]
-    ):
-        positive_score += 2
+    positive_phrases = [
+        "thank you",
+        "well done",
+        "looking forward",
+        "highly recommend",
+        "very happy",
+        "really good",
+        "pleasant surprise",
+        "exceeded expectations",
+        "works perfectly",
+        "great job"
+    ]
 
-    # Negative phrases
-    if any(
-        phrase in text
-        for phrase in [
-            "not good",
-            "very bad",
-            "does not work",
-            "doesn't work",
-            "waste of money",
-            "never again",
-            "very disappointed",
-            "poor quality",
-            "not happy"
-        ]
-    ):
-        negative_score += 2
+    negative_phrases = [
+        "not good",
+        "very bad",
+        "does not work",
+        "doesn't work",
+        "waste of money",
+        "never again",
+        "very disappointed",
+        "poor quality",
+        "not happy",
+        "highly disappointed"
+    ]
+
+    for phrase in positive_phrases:
+        if phrase in text:
+            positive_score += 2
+
+    for phrase in negative_phrases:
+        if phrase in text:
+            negative_score += 2
 
     if positive_score > negative_score:
         return "happy"
 
     if negative_score > positive_score:
+        return "sad"
+
+    # Final tie-breaker
+    if any(word in text for word in ["thank", "thanks", "glad", "pleased"]):
+        return "happy"
+
+    if any(word in text for word in ["sorry", "regret", "unfortunately"]):
         return "sad"
 
     return "neutral"
