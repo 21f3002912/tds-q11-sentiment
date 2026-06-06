@@ -18,86 +18,82 @@ class SentimentRequest(BaseModel):
     sentences: List[str]
 
 
-HAPPY_WORDS = {
-    "love", "loved", "like", "liked", "enjoy", "enjoyed",
-    "great", "excellent", "amazing", "awesome", "fantastic",
-    "wonderful", "best", "good", "happy", "excited",
-    "pleased", "perfect", "brilliant", "superb", "outstanding",
-    "delightful", "positive", "beautiful", "fun", "recommend",
-    "recommended", "impressed", "satisfied", "success",
-    "successful", "nice", "favorite", "favourite", "glad",
-    "thrilled", "incredible", "joy", "joyful", "helpful",
-    "excellent", "lovely", "charming"
-}
-
-SAD_WORDS = {
-    "hate", "hated", "bad", "terrible", "awful", "horrible",
-    "worst", "sad", "angry", "upset", "disappointed",
-    "poor", "depressed", "unhappy", "annoying", "useless",
-    "frustrated", "negative", "boring", "disaster", "fail",
-    "failed", "failure", "problem", "problems", "issue",
-    "issues", "broken", "slow", "waste", "regret",
-    "dislike", "furious", "pathetic", "mediocre",
-    "dreadful", "complaint", "complaints", "disappointing",
-    "unacceptable", "bug", "bugs", "error", "errors"
-}
-
-
-POSITIVE_PHRASES = [
-    "thank you",
-    "well done",
-    "looking forward",
-    "works perfectly",
-    "highly recommend",
-    "very happy",
-    "very good",
-    "really good",
-    "extremely happy",
-    "pleasant surprise",
-    "exceeded expectations"
+POSITIVE_TERMS = [
+    "love", "lov", "like", "enjoy", "great", "good",
+    "excellent", "amazing", "awesome", "fantastic",
+    "wonderful", "best", "happy", "joy", "excited",
+    "brilliant", "perfect", "superb", "outstanding",
+    "recommend", "success", "successful", "win",
+    "won", "positive", "beautiful", "pleased",
+    "delighted", "grateful", "thankful", "cheerful",
+    "impressive", "impressed", "favourite", "favorite"
 ]
 
-NEGATIVE_PHRASES = [
-    "not good",
-    "very bad",
-    "doesn't work",
-    "does not work",
-    "waste of money",
-    "never again",
-    "highly disappointed",
-    "very disappointed",
-    "extremely disappointed",
-    "not happy",
-    "poor quality"
+NEGATIVE_TERMS = [
+    "hate", "hated", "bad", "terrible", "awful",
+    "horrible", "worst", "sad", "angry", "upset",
+    "disappointed", "poor", "depressed", "unhappy",
+    "annoy", "frustrat", "negative", "boring",
+    "disaster", "fail", "failure", "problem",
+    "issue", "broken", "slow", "waste",
+    "regret", "furious", "pathetic", "dreadful",
+    "complaint", "miserable", "heartbroken",
+    "tragic", "hurt", "pain", "loss", "lost"
 ]
 
 
 def classify_sentiment(sentence: str) -> str:
     text = sentence.lower()
 
-    happy_score = 0
-    sad_score = 0
+    positive_score = 0
+    negative_score = 0
 
-    for word in HAPPY_WORDS:
-        if word in text:
-            happy_score += 1
+    for term in POSITIVE_TERMS:
+        if term in text:
+            positive_score += 1
 
-    for word in SAD_WORDS:
-        if word in text:
-            sad_score += 1
+    for term in NEGATIVE_TERMS:
+        if term in text:
+            negative_score += 1
 
-    for phrase in POSITIVE_PHRASES:
-        if phrase in text:
-            happy_score += 2
+    # Positive phrases
+    if any(
+        phrase in text
+        for phrase in [
+            "thank you",
+            "well done",
+            "looking forward",
+            "works perfectly",
+            "highly recommend",
+            "very happy",
+            "really good",
+            "pleasant surprise",
+            "exceeded expectations"
+        ]
+    ):
+        positive_score += 2
 
-    for phrase in NEGATIVE_PHRASES:
-        if phrase in text:
-            sad_score += 2
+    # Negative phrases
+    if any(
+        phrase in text
+        for phrase in [
+            "not good",
+            "very bad",
+            "does not work",
+            "doesn't work",
+            "waste of money",
+            "never again",
+            "very disappointed",
+            "poor quality",
+            "not happy"
+        ]
+    ):
+        negative_score += 2
 
-    if happy_score > sad_score:
+    if positive_score > negative_score:
         return "happy"
 
-    if sad_score > happy_score:
+    if negative_score > positive_score:
         return "sad"
 
     return "neutral"
